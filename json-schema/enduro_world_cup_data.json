@@ -1,0 +1,18 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/adamml/enduro-world-cup-data/json-schema/enduro_world_cup_data.json",
+    "title": "EnduroWorldCupData",
+    "type": "array",
+    "description": "",
+    "items": {
+        "type" :"object",
+        "properties": {
+            "rider": {"type": "string"},
+            "team": {"type": ["string", "null"]},
+            "nation": {"type": "string"},
+            "position": {"type": ["integer", "null"]},
+            "dnf": {"type": "boolean"},
+            "dns": {"type": "boolean"}
+        }
+    }
+}
