@@ -10,6 +10,7 @@ So this repo tries to address that by taking the MTB Enduro data and putting it 
 
 ## Dependencies
 
+- [beautifulsoup4](https://www.crummy.com/software/BeautifulSoup/) >=4.12.2
 - [matplotlib](https://matplotlib.org/) >=3.7.1
 
 ## Running the code
