@@ -10,8 +10,57 @@ from typing import Optional
 
 _URL_LIST = [[2023,1,"Maydena, Tasmania", "AUS", "F", "https://ucimtbworldseries.com/results/raceCategory/maydena-edr-women-elite/2023"],
              [2023,1,"Maydena, Tasmania", "AUS", "M", "https://ucimtbworldseries.com/results/raceCategory/maydena-edr-men-elite/2023"],
-             [2023,7,"Les Gets","FRA","F","https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-les-portes-du-soleil-edr-women-elite"]]
+             [2023,2,"Derby, Tasmania", "AUS", "M", "https://ucimtbworldseries.com/results/raceCategory/derby-edr-men-elite/2023"],
+             [2023,2,"Derby, Tasmania", "AUS", "F", "https://ucimtbworldseries.com/results/raceCategory/derby-edr-women-elite/2023"],
+             [2023, 3, "Finale Ligure", "ITA", "M", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-finale-outdoor-region-edr-men-elite/2023"],
+             [2023, 3, "Finale Ligure", "ITA", "F", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-finale-outdoor-region-edr-women-elite/2023"],
+             [2023, 4, "Leogang", "AUT", "M", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-leogang-salzburgerland-edr-men-elite/2023"],
+             [2023, 4, "Leogang", "AUT", "F", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-leogang-salzburgerland-edr-women-elite/2023"],
+             [2024, 5, "Val Di Fassa Trentino", "ITA", "M", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-val-di-fassa-trentino-edr-men-elite/2023"],
+             [2024, 5, "Val Di Fassa Trentino", "ITA", "F", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-val-di-fassa-trentino-edr-women-elite/2023"],
+             [2024, 6, "Loudenville-Peyragudes", "FRA", "M", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-loudenvielle-peyragudes-edr-men-elite/2023"],
+             [2024, 6, "Loudenville-Peyragudes", "FRA", "F", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-loudenvielle-peyragudes-edr-women-elite/2023"],
+             [2024, 7, "Les Gets", "FRA", "M", "https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-les-portes-du-soleil-edr-men-elite/2023"],
+             [2023,7,"Les Gets","FRA","F","https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-les-portes-du-soleil-edr-women-elite/2023"]]
 """A private module level variable listing all the URLs to scrape data from"""
+
+class StageRecord:
+    """This class describes an individual record of a rider's result for a
+    given stage of a given round of the Enduro World Series or UCI Mountain
+    Bike Enduro World Cup"""
+    def __init__(self,
+                 event_stage_sequence: int,
+                 position: Optional[int],
+                 stage_time_seconds: Optional[float],
+                 stage_points: Optional[int]):
+        self.__event_stage_sequence = event_stage_sequence
+        self.__position = position
+        self.__stage_points = stage_points
+        self.__stage_time_seconds = stage_time_seconds
+
+    @property
+    def event_stage_sequence(self) -> int:
+        return self.__event_stage_sequence
+        
+    @property
+    def position(self) -> Optional[int]:
+        return self.__position
+    
+    @property
+    def stage_time_seconds(self) -> Optional[float]:
+        return self.__stage_time_seconds
+    
+    @property
+    def stage_points(self) -> Optional[int]:
+        return self.__stage_points
+        
+    def asDict(self) -> dict:
+        return {
+            "event_stage_sequence": self.__event_stage_sequence,
+            "position": self.__position,
+            "stage_time_seconds": self.__stage_time_seconds,
+            "stage_points": self.__stage_points
+        }
 
 class DataRecord:
     """This  class describes an individual record of a rider's result for a
@@ -32,7 +81,8 @@ class DataRecord:
                  dns: Optional[bool]=False,
                  event_time_seconds: Optional[float]=None,
                  event_delta_seconds: Optional[float]=None,
-                 event_points: Optional[int]=0):
+                 event_points: Optional[int]=0,
+                 stages: Optional[list]=[]):
         self.__event_year = event_year
         self.__event_year_sequence = event_year_sequence
         self.__event_location = event_location
@@ -48,7 +98,7 @@ class DataRecord:
         self.__event_time_seconds = event_time_seconds
         self.__event_delta_seconds = event_delta_seconds
         self.__event_points = event_points
-        self.__stages = []
+        self.__stages = stages
 
     @property 
     def rider(self) -> Optional[str]:
@@ -119,7 +169,7 @@ def fetchData() -> list:
     for url in _URL_LIST:
         with urllib.request.urlopen(str(url[5])) as uopen:
             soup = BeautifulSoup(uopen, 'html.parser')
-
+            stages = []
             for table in soup.find_all('tbody'):
                 if str(table.get('class')).find('divide') > -1:
                     i: int = 0
@@ -133,6 +183,7 @@ def fetchData() -> list:
                     racedelta: Optional[float] = None
                     position: Optional[int] = None
                     points: Optional[int] = None
+                    stages = []
                     for tr in table.find_all('tr'):
                         for tc in tr.find_all('a'):
                             for h3 in tc.find_all('h3'):
@@ -141,7 +192,7 @@ def fetchData() -> list:
                                     results.append(DataRecord(
                                         url[0], url[1], url[2], url[3], url[4],
                                         rider, rider_id, team, nation, position, dnf,
-                                        dns, racetime, racedelta, points))
+                                        dns, racetime, racedelta, points, stages))
                                 rider = h3.get_text().title().strip()
                                 try:
                                     rider_id = int(tc.get('href').split('/')[-1])
@@ -190,10 +241,35 @@ def fetchData() -> list:
                                     points = 0
                             for p in tc.find_all('p'):
                                 team = p.get_text().title().strip()
-
-                    
+                        for t2 in tr.find_all('table'):
+                            passed_head = False
+                            for tr2 in t2.find_all('tr'):
+                                if passed_head:
+                                    td2 = tr2.find_all('td')
+                                    st_seq = int(td2[0].get_text().strip().split(' ')[1])
+                                    try:
+                                        st_pos = int(td2[2].get_text().strip())
+                                    except ValueError:
+                                        st_pos = None
+                                    try:
+                                        st_tim = _hhmmssStrToFloat(td2[1].get_text().strip()[4:])
+                                    except ValueError:
+                                        st_tim = None
+                                    try:
+                                        st_pts = int(td2[3].get_text().strip())
+                                    except ValueError:
+                                        st_pts = None
+                                    stages.append(StageRecord(
+                                        st_seq,
+                                        st_pos,
+                                        st_tim,
+                                        st_pts
+                                    ))
+                                else:
+                                    passed_head = True
+                                    stages = []
                     results.append(DataRecord(
                         int(url[0]), int(url[1]), str(url[2]), str(url[3]), str(url[4]),
                         rider, rider_id, team, nation, position,
-                        dnf, dns, racetime, racedelta))
+                        dnf, dns, racetime, racedelta, stages=stages))
     return results
