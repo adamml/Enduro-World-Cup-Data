@@ -15,3 +15,11 @@ So this repo tries to address that by taking the MTB Enduro data and putting it 
 - [polars]() >=0.20.25
 
 ## Running the code
+
+## Sample plots
+
+### 1. Finish spread
+
+Showing both actual time and percentage time deltas to the overall race winner.
+
+![Finish spread](img/finish_spread.png)
