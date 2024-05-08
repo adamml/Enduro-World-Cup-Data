@@ -7,6 +7,7 @@
     "items": {
         "type" :"object",
         "properties": {
+            "event_year": {"type": "integer"},
             "rider": {"type": "string"},
             "team": {"type": ["string", "null"]},
             "nation": {"type": "string"},

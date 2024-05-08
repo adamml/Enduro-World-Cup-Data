@@ -8,9 +8,9 @@ import urllib.request
 from bs4 import BeautifulSoup
 from typing import Optional
 
-_URL_LIST = [[2023,1,"Maydena, Tasmania", "AUS", "F", "https://ucimtbworldseries.com/results/raceCategory/maydena-edr-women-elite"],
-             [2023,7,"Les Gets","FRA","F","https://ucimtbworldseries.com/results/raceCategory/" + 
-                "uci-edr-world-cup-les-portes-du-soleil-edr-women-elite"]]
+_URL_LIST = [[2023,1,"Maydena, Tasmania", "AUS", "F", "https://ucimtbworldseries.com/results/raceCategory/maydena-edr-women-elite/2023"],
+             [2023,1,"Maydena, Tasmania", "AUS", "M", "https://ucimtbworldseries.com/results/raceCategory/maydena-edr-men-elite/2023"],
+             [2023,7,"Les Gets","FRA","F","https://ucimtbworldseries.com/results/raceCategory/uci-edr-world-cup-les-portes-du-soleil-edr-women-elite"]]
 """A private module level variable listing all the URLs to scrape data from"""
 
 class DataRecord:
@@ -48,6 +48,7 @@ class DataRecord:
         self.__event_time_seconds = event_time_seconds
         self.__event_delta_seconds = event_delta_seconds
         self.__event_points = event_points
+        self.__stages = []
 
     @property 
     def rider(self) -> Optional[str]:
@@ -80,6 +81,10 @@ class DataRecord:
     @property
     def event_delta_seconds(self) -> Optional[float]:
         return self.__event_delta_seconds
+    
+    @property
+    def stages(self) -> Optional[list]:
+        return self.__stages
 
     def asDict(self) -> dict:
         """Returns the instance of DataRecord as a Python `dict`"""
@@ -98,7 +103,8 @@ class DataRecord:
             "dns": self.__dns,
             "event_time_seconds": self.__event_time_seconds,
             "event_time_delta": self.__event_delta_seconds,
-            "event_points": self.__event_points
+            "event_points": self.__event_points,
+            "stages": self.__stages
         }
 
 
@@ -110,7 +116,6 @@ def _hhmmssStrToFloat(hhmmss:str) -> float:
 def fetchData() -> list:
     results = []
     """Scrape all results from the UCI Mountain Bike World Cup website"""
-    print(_URL_LIST)
     for url in _URL_LIST:
         with urllib.request.urlopen(str(url[5])) as uopen:
             soup = BeautifulSoup(uopen, 'html.parser')
@@ -138,7 +143,10 @@ def fetchData() -> list:
                                         rider, rider_id, team, nation, position, dnf,
                                         dns, racetime, racedelta, points))
                                 rider = h3.get_text().title().strip()
-                                rider_id = int(tc.get('href').split('/')[-1])
+                                try:
+                                    rider_id = int(tc.get('href').split('/')[-1])
+                                except ValueError:
+                                    rider_id = None
                                 team = None
                                 nation = None
                                 position = None

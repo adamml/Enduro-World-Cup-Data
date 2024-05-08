@@ -12,5 +12,6 @@ So this repo tries to address that by taking the MTB Enduro data and putting it 
 
 - [beautifulsoup4](https://www.crummy.com/software/BeautifulSoup/) >=4.12.2
 - [matplotlib](https://matplotlib.org/) >=3.7.1
+- [polars]() >=0.20.25
 
 ## Running the code
